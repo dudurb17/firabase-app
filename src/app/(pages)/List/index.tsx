@@ -1,3 +1,4 @@
+import Container from "@/src/components/Container";
 import Loading from "@/src/components/Loading";
 import { User } from "@/src/types/User";
 import { collection, getDocs } from "firebase/firestore";
@@ -44,6 +45,7 @@ export default function List() {
   }
 
   return (
+    <Container>
     <ScrollView 
       style={styles.container}
       refreshControl={
@@ -88,6 +90,7 @@ export default function List() {
         </View>
       )}
     </ScrollView>
+    </Container>
   );
 }
 

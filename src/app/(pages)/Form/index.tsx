@@ -1,15 +1,16 @@
+import Container from "@/src/components/Container";
+import { db } from "@/src/config/firebase";
+import { addDoc, collection } from "firebase/firestore";
 import React, { useState } from "react";
 import {
+  Alert,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
-  Alert,
 } from "react-native";
 import styles from "./styles";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/src/config/firebase";
 
 interface UserForm {
   name: string;
@@ -47,6 +48,7 @@ export default function Form() {
   };
 
   return (
+    <Container>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>📝 User Registration</Text>
@@ -119,6 +121,7 @@ export default function Form() {
           </View>
         </View>
       </ScrollView>
+    </Container>
   );
 }
 

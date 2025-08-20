@@ -1,7 +1,8 @@
+import Container from "@/src/components/Container";
 import { User } from "@/src/types/User";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { db } from "../../../config/firebase";
 import styles from "./styles";
 
@@ -45,10 +46,7 @@ export default function Index() {
   }, []);
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <Container>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>👤 Gerenciar Usuário</Text>
@@ -104,7 +102,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </Container>
   );
 }
 
