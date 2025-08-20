@@ -1,16 +1,13 @@
-import { Text, TextInput, TouchableOpacity, View, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { db } from "../../../config/firebase";
+import { User } from "@/src/types/User";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { db } from "../../../config/firebase";
 import styles from "./styles";
 
-interface User {
-  name: string; 
-  age: string;
-}
 
 export default function Index() {
-  const [users, setUsers] = useState<User>({ name: "", age: "" });
+  const [users, setUsers] = useState<User>({ id: "", name: "", age: "" });
   const [loading, setLoading] = useState(false);
 
   const getUserSnapshot = () => {
