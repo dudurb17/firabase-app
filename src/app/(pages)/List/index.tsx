@@ -1,42 +1,22 @@
 import Container from "@/src/components/Container";
 import Loading from "@/src/components/Loading";
-import { User } from "@/src/types/User";
-import { collection, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
-import { db } from "../../../config/firebase";
+import React from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import useList from "./hooks/useList";
 import styles from "./styles";
 
 export default function List() {
-  const [data, setData] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const users = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })) as User[];
-      setData(users);
-    } catch (error) {
-      console.log("Erro ao buscar dados:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchData();
-    setRefreshing(false);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const {
+    data,
+    loading,
+    sortField,
+    handleSort,
+    getSortIcon,
+    getSortLabel,
+    handleDelete,
+    deletingId,
+  } = useList();
 
   if (loading) {
     return <Loading text="Carregando usuários..." />;
@@ -44,58 +24,122 @@ export default function List() {
 
   return (
     <Container>
-      <ScrollView
-        style={styles.container}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>Lista de Usuários</Text>
-          <Text style={styles.subtitle}>
-            {data.length} usuário(s) encontrado(s)
+      <View style={styles.header}>
+        <Text style={styles.title}>Lista de Usuários</Text>
+        <Text style={styles.subtitle}>
+          {data.length} usuário(s) encontrado(s)
+        </Text>
+      </View>
+
+      {data.length > 0 && (
+        <View style={styles.filtersContainer}>
+          <Text style={styles.filtersTitle}>Ordenar por:</Text>
+          <View style={styles.filtersRow}>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                sortField === "age" && styles.filterButtonActive,
+              ]}
+              onPress={() => handleSort("age")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  sortField === "age" && styles.filterButtonTextActive,
+                ]}
+              >
+                {getSortIcon("age")} {getSortLabel("age")}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                sortField === "createdAt" && styles.filterButtonActive,
+              ]}
+              onPress={() => handleSort("createdAt")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  sortField === "createdAt" && styles.filterButtonTextActive,
+                ]}
+              >
+                {getSortIcon("createdAt")} {getSortLabel("createdAt")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {data.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>👥</Text>
+          <Text style={styles.emptyTitle}>Nenhum usuário encontrado</Text>
+          <Text style={styles.emptySubtitle}>
+            Puxe para baixo para atualizar
           </Text>
         </View>
-
-        {data.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>👥</Text>
-            <Text style={styles.emptyTitle}>Nenhum usuário encontrado</Text>
-            <Text style={styles.emptySubtitle}>
-              Puxe para baixo para atualizar
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.listContainer}>
-            {data.map((user, index) => (
-              <View key={user.id || index} style={styles.card}>
+      ) : (
+        <FlatList
+          data={data}
+          style={styles.listContainer}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => (
+            <View>
+              <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>
-                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                      {item.name ? item.name.charAt(0).toUpperCase() : "U"}
                     </Text>
                   </View>
                   <View style={styles.userInfo}>
                     <Text style={styles.userName}>
-                      {user.name || "Nome não informado"}
+                      {item.name || "Nome não informado"}
                     </Text>
                     <Text style={styles.userAge}>
-                      Idade: {user.age || "Não informada"}
+                      Idade: {item.age || "Não informada"}
                     </Text>
                   </View>
                 </View>
-
-                {user.position && (
+                {item.position && (
                   <View style={styles.cardDetail}>
                     <Text style={styles.detailLabel}>💼 Cargo:</Text>
-                    <Text style={styles.detailValue}>{user.position}</Text>
+                    <Text style={styles.detailValue}>{item.position}</Text>
                   </View>
                 )}
+                {item.createdAt && (
+                  <View style={styles.cardDetail}>
+                    <Text style={styles.detailLabel}>📅 Criado em:</Text>
+                    <Text style={styles.detailValue}>
+                      {item.createdAt.toDate().toLocaleDateString("pt-BR")}
+                    </Text>
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={[
+                    styles.deleteButton,
+                    deletingId === item.id && styles.deleteButtonLoading,
+                  ]}
+                  onPress={() => handleDelete(item.id)}
+                  activeOpacity={0.7}
+                  disabled={deletingId === item.id}
+                >
+                  <Text
+                    style={[
+                      styles.deleteButtonText,
+                      deletingId === item.id && styles.deleteButtonTextLoading,
+                    ]}
+                  >
+                    {deletingId === item.id ? "⏳ Excluindo..." : "🗑️ Excluir"}
+                  </Text>
+                </TouchableOpacity>
               </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+            </View>
+          )}
+        />
+      )}
     </Container>
   );
 }
