@@ -3,4 +3,5 @@ export interface User {
   name: string;
   age: string;
   position?: string;
+  createdAt?: Date;
 }

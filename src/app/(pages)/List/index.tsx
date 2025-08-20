@@ -18,7 +18,7 @@ export default function List() {
       const querySnapshot = await getDocs(collection(db, "users"));
       const users = querySnapshot.docs.map((doc) => ({
         ...doc.data(),
-        id: doc.id
+        id: doc.id,
       })) as User[];
       setData(users);
     } catch (error) {
@@ -39,58 +39,63 @@ export default function List() {
   }, []);
 
   if (loading) {
-    return (
-      <Loading text="Carregando usuários..."  />
-    );
+    return <Loading text="Carregando usuários..." />;
   }
 
   return (
     <Container>
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>Lista de Usuários</Text>
-        <Text style={styles.subtitle}>{data.length} usuário(s) encontrado(s)</Text>
-      </View>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Lista de Usuários</Text>
+          <Text style={styles.subtitle}>
+            {data.length} usuário(s) encontrado(s)
+          </Text>
+        </View>
 
-      {data.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>👥</Text>
-          <Text style={styles.emptyTitle}>Nenhum usuário encontrado</Text>
-          <Text style={styles.emptySubtitle}>Puxe para baixo para atualizar</Text>
-        </View>
-      ) : (
-        <View style={styles.listContainer}>
-          {data.map((user, index) => (
-            <View key={user.id || index} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </Text>
+        {data.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>👥</Text>
+            <Text style={styles.emptyTitle}>Nenhum usuário encontrado</Text>
+            <Text style={styles.emptySubtitle}>
+              Puxe para baixo para atualizar
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.listContainer}>
+            {data.map((user, index) => (
+              <View key={user.id || index} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                    </Text>
+                  </View>
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>
+                      {user.name || "Nome não informado"}
+                    </Text>
+                    <Text style={styles.userAge}>
+                      Idade: {user.age || "Não informada"}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{user.name || 'Nome não informado'}</Text>
-                  <Text style={styles.userAge}>Idade: {user.age || 'Não informada'}</Text>
-                </View>
+
+                {user.position && (
+                  <View style={styles.cardDetail}>
+                    <Text style={styles.detailLabel}>💼 Cargo:</Text>
+                    <Text style={styles.detailValue}>{user.position}</Text>
+                  </View>
+                )}
               </View>
-              
-              {user.position && (
-                <View style={styles.cardDetail}>
-                  <Text style={styles.detailLabel}>💼 Cargo:</Text>
-                  <Text style={styles.detailValue}>{user.position}</Text>
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </Container>
   );
 }
-

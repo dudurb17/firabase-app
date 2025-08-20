@@ -1,7 +1,7 @@
 import Container from "@/src/components/Container";
 import { db } from "@/src/config/firebase";
-import { addDoc, collection } from "firebase/firestore";
-import React, { useState } from "react";
+import { addDoc, collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -24,6 +24,11 @@ export default function Form() {
     age: "",
     position: "",
   });
+  const [userLast, setUserLast] = useState<UserForm>({
+    name: "",
+    age: "",
+    position: "",
+  });
 
   const handleSave = () => {
     if (!userForm.name.trim() || !userForm.age.trim() || !userForm.position.trim()) {
@@ -31,12 +36,37 @@ export default function Form() {
       return;
     }
 
-    addDoc(collection(db, "users"), userForm).then(() => {
+    addDoc(collection(db, "users"), {
+      ...userForm,
+      createdAt: new Date(),
+    }).then(() => {
       handleClear();
       Alert.alert("Success", "User saved successfully!");
     }).catch((error) => {
       Alert.alert("Error", error.message);
     });
+  };
+
+  const fetchLastUser = async () => {
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, orderBy("createdAt", "desc"), limit(1));
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          const lastUser = snapshot.docs[0];
+          setUserLast({
+            name: lastUser.data().name,
+            age: lastUser.data().age,
+            position: lastUser.data().position,
+          });
+        }
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Erro ao buscar último usuário:", error);
+    }
   };
 
   const handleClear = () => {
@@ -46,6 +76,23 @@ export default function Form() {
       position: "",
     });
   };
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    
+    const setupListener = async () => {
+      unsubscribe = await fetchLastUser();
+    };
+    
+    setupListener();
+    
+    // Cleanup function para limpar o listener
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   return (
     <Container>
@@ -110,13 +157,13 @@ export default function Form() {
           <Text style={styles.previewTitle}>Preview</Text>
           <View style={styles.previewContent}>
             <Text style={styles.previewText}>
-              <Text style={styles.previewLabel}>Name:</Text> {userForm.name || "Not provided"}
+                <Text style={styles.previewLabel}>Name:</Text> {userLast.name || "Não informado"}
             </Text>
             <Text style={styles.previewText}>
-              <Text style={styles.previewLabel}>Age:</Text> {userForm.age || "Not provided"}
+              <Text style={styles.previewLabel}>Age:</Text> {userLast.age || "Não informado"}
             </Text>
             <Text style={styles.previewText}>
-              <Text style={styles.previewLabel}>Position:</Text> {userForm.position || "Not provided"}
+              <Text style={styles.previewLabel}>Position:</Text> {userLast.position || "Não informado"}
             </Text>
           </View>
         </View>
