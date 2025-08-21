@@ -1,12 +1,13 @@
+import Card from "@/src/components/Card";
 import Container from "@/src/components/Container";
 import Loading from "@/src/components/Loading";
+import { router } from "expo-router";
 import React from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import useList from "./hooks/useList";
 import styles from "./styles";
 
 export default function List() {
-
   const {
     data,
     loading,
@@ -30,7 +31,6 @@ export default function List() {
           {data.length} usuário(s) encontrado(s)
         </Text>
       </View>
-
       {data.length > 0 && (
         <View style={styles.filtersContainer}>
           <Text style={styles.filtersTitle}>Ordenar por:</Text>
@@ -86,57 +86,15 @@ export default function List() {
           style={styles.listContainer}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <View>
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                      {item.name ? item.name.charAt(0).toUpperCase() : "U"}
-                    </Text>
-                  </View>
-                  <View style={styles.userInfo}>
-                    <Text style={styles.userName}>
-                      {item.name || "Nome não informado"}
-                    </Text>
-                    <Text style={styles.userAge}>
-                      Idade: {item.age || "Não informada"}
-                    </Text>
-                  </View>
-                </View>
-                {item.position && (
-                  <View style={styles.cardDetail}>
-                    <Text style={styles.detailLabel}>💼 Cargo:</Text>
-                    <Text style={styles.detailValue}>{item.position}</Text>
-                  </View>
-                )}
-                {item.createdAt && (
-                  <View style={styles.cardDetail}>
-                    <Text style={styles.detailLabel}>📅 Criado em:</Text>
-                    <Text style={styles.detailValue}>
-                      {item.createdAt.toDate().toLocaleDateString("pt-BR")}
-                    </Text>
-                  </View>
-                )}
-                <TouchableOpacity
-                  style={[
-                    styles.deleteButton,
-                    deletingId === item.id && styles.deleteButtonLoading,
-                  ]}
-                  onPress={() => handleDelete(item.id)}
-                  activeOpacity={0.7}
-                  disabled={deletingId === item.id}
-                >
-                  <Text
-                    style={[
-                      styles.deleteButtonText,
-                      deletingId === item.id && styles.deleteButtonTextLoading,
-                    ]}
-                  >
-                    {deletingId === item.id ? "⏳ Excluindo..." : "🗑️ Excluir"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <Card
+              item={item}
+              handleDelete={handleDelete}
+              onPress={() => router.push({
+                pathname: "/UpdateUser",
+                params: { id: item.id }
+              })}
+              key={item.id}
+            />
           )}
         />
       )}
