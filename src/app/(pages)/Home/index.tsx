@@ -1,9 +1,10 @@
 import Container from "@/src/components/Container";
 import { User } from "@/src/types/User";
+import { signOut } from "firebase/auth";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { db } from "../../../config/firebase";
+import { auth, db } from "../../../config/firebase";
 import styles from "./styles";
 
 
@@ -101,6 +102,10 @@ export default function Index() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity onPress={() => signOut(auth)} style={styles.logoutButton}>
+          <Text>Sair</Text>
+        </TouchableOpacity>
       </ScrollView>
     </Container>
   );

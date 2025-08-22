@@ -110,4 +110,11 @@ export default StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  logoutButton: {
+    backgroundColor: "#e74c3c",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 10,
+  },
 });
