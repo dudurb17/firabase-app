@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "123456789012",
+    "project_id": "firabase-app-temp",
+    "storage_bucket": "firabase-app-temp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:abcd1234efgh5678",
+        "android_client_info": {
+          "package_name": "com.dudu_rb.firabaseapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123456789012-abcd1234efgh5678ijkl9012mnop3456.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABC123DEF456GHI789JKL012MNO345PQR678"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123456789012-abcd1234efgh5678ijkl9012mnop3456.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

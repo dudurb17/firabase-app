@@ -1,6 +1,13 @@
 import Container from "@/src/components/Container";
-import { db } from "@/src/config/firebase";
-import { addDoc, collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import { auth, db } from "@/src/config/firebase";
+import {
+  addDoc,
+  collection,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -31,27 +38,48 @@ export default function Form() {
   });
 
   const handleSave = () => {
-    if (!userForm.name.trim() || !userForm.age.trim() || !userForm.position.trim()) {
+    if (
+      !userForm.name.trim() ||
+      !userForm.age.trim() ||
+      !userForm.position.trim()
+    ) {
       Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!auth.currentUser) {
+      Alert.alert("Error", "You need to be logged in to save data");
       return;
     }
 
     addDoc(collection(db, "users"), {
       ...userForm,
       createdAt: new Date(),
-    }).then(() => {
-      handleClear();
-      Alert.alert("Success", "User saved successfully!");
-    }).catch((error) => {
-      Alert.alert("Error", error.message);
-    });
+      createdBy: auth.currentUser.uid,
+    })
+      .then(() => {
+        handleClear();
+        Alert.alert("Success", "User saved successfully!");
+      })
+      .catch((error) => {
+        console.error("Error saving user:", error);
+        if (error.code === "permission-denied") {
+          Alert.alert(
+            "Permission Error",
+            "You don't have permission to save data. Please check if you're logged in."
+          );
+        } else {
+          Alert.alert("Error", error.message);
+        }
+      });
   };
 
   const fetchLastUser = async () => {
     try {
       const usersRef = collection(db, "users");
       const q = query(usersRef, orderBy("createdAt", "desc"), limit(1));
-      
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         if (!snapshot.empty) {
           const lastUser = snapshot.docs[0];
@@ -79,13 +107,13 @@ export default function Form() {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
-    
+
     const setupListener = async () => {
       unsubscribe = await fetchLastUser();
     };
-    
+
     setupListener();
-    
+
     // Cleanup function para limpar o listener
     return () => {
       if (unsubscribe) {
@@ -137,7 +165,9 @@ export default function Form() {
               placeholder="Enter job position"
               placeholderTextColor="#9CA3AF"
               value={userForm.position}
-              onChangeText={(text) => setUserForm({ ...userForm, position: text })}
+              onChangeText={(text) =>
+                setUserForm({ ...userForm, position: text })
+              }
               autoCapitalize="words"
             />
           </View>
@@ -157,13 +187,16 @@ export default function Form() {
           <Text style={styles.previewTitle}>Preview</Text>
           <View style={styles.previewContent}>
             <Text style={styles.previewText}>
-                <Text style={styles.previewLabel}>Name:</Text> {userLast.name || "Não informado"}
+              <Text style={styles.previewLabel}>Name:</Text>{" "}
+              {userLast.name || "Não informado"}
             </Text>
             <Text style={styles.previewText}>
-              <Text style={styles.previewLabel}>Age:</Text> {userLast.age || "Não informado"}
+              <Text style={styles.previewLabel}>Age:</Text>{" "}
+              {userLast.age || "Não informado"}
             </Text>
             <Text style={styles.previewText}>
-              <Text style={styles.previewLabel}>Position:</Text> {userLast.position || "Não informado"}
+              <Text style={styles.previewLabel}>Position:</Text>{" "}
+              {userLast.position || "Não informado"}
             </Text>
           </View>
         </View>
@@ -171,4 +204,3 @@ export default function Form() {
     </Container>
   );
 }
-
